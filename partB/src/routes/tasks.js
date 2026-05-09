@@ -1,27 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./database');
+const TaskService = require('../services/taskService');
 
 router.get('/', (req, res) => {
-    const { status, priority, search } = req.query;
-    let query = 'SELECT * FROM tasks WHERE 1=1';
-    const params = [];
-
-    if (status) {
-        query += ' AND status = ?';
-        params.push(status);
-    }
-    if (priority) {
-        query += ' AND priority = ?';
-        params.push(priority);
-    }
-    if (search) {
-        query += ' AND title LIKE ?';
-        params.push(`%${search}%`);
-    }
-
     try {
-        const tasks = db.prepare(query + ' ORDER BY created_at DESC').all(...params);
+        const tasks = TaskService.getAllTasks(req.query);
         res.json({ success: true, data: tasks });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -29,22 +12,16 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    const { title, description, priority, due_date } = req.body;
-    
+    const { title } = req.body;
     if (!title) {
         return res.status(400).json({ success: false, error: 'Гарчиг заавал байх ёстой!' });
     }
 
     try {
-        const stmt = db.prepare(`
-            INSERT INTO tasks (title, description, priority, due_date) 
-            VALUES (?, ?, ?, ?)
-        `);
-        const info = stmt.run(title, description, priority || 'medium', due_date || null);
-        
+        const info = TaskService.createTask(req.body);
         res.status(201).json({
             success: true,
-            data: { id: info.lastInsertRowid, title, description, priority, due_date }
+            data: { id: info.lastInsertRowid, ...req.body }
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -52,17 +29,8 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-    const { title, description, status, priority, due_date } = req.body;
-    const { id } = req.params;
-
     try {
-        const stmt = db.prepare(`
-            UPDATE tasks 
-            SET title = ?, description = ?, status = ?, priority = ?, due_date = ?
-            WHERE id = ?
-        `);
-        const info = stmt.run(title, description, status, priority, due_date, id);
-
+        const info = TaskService.updateTask(req.params.id, req.body);
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Даалгавар олдсонгүй' });
         }
@@ -73,9 +41,8 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-    const { id } = req.params;
     try {
-        const info = db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
+        const info = TaskService.deleteTask(req.params.id);
         if (info.changes === 0) {
             return res.status(404).json({ success: false, error: 'Даалгавар олдсонгүй' });
         }

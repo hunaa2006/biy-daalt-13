@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./database');
+const taskRouter = require('./routes/tasks'); 
 
 const app = express();
 const PORT = 3000;
@@ -8,6 +8,8 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+app.use('/tasks', taskRouter);
 
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'Server is running' });
