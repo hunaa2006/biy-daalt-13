@@ -1,0 +1,126 @@
+openapi: 3.0.0
+info:
+  title: Personal Task Tracker API
+  description: "Бие даалт 13: Даалгавар удирдах системийн REST API баримт бичиг"
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Локал хөгжүүлэлтийн сервер
+
+paths:
+  /tasks:
+    get:
+      summary: Бүх даалгаврыг жагсааж харах
+      parameters:
+        - name: status
+          in: query
+          description: "Статусаар шүүх (pending, completed)"
+          schema:
+            type: string
+        - name: priority
+          in: query
+          description: "Тэргүүлэх чиглэлээр шүүх (low, medium, high)"
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: "Гарчиг болон тайлбараар хайх"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Амжилттай
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+
+    post:
+      summary: Шинэ даалгавар үүсгэх
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        '201':
+          description: Амжилттай үүсгэгдлээ
+        '400':
+          description: Мэдээлэл дутуу эсвэл буруу
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Даалгавар шинэчлэх
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        '200':
+          description: Амжилттай шинэчлэгдлээ
+        '404':
+          description: Даалгавар олдсонгүй
+    delete:
+      summary: Даалгавар устгах
+      responses:
+        '200':
+          description: Амжилттай устгагдлаа
+        '404':
+          description: Даалгавар олдсонгүй
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        due_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+
+    TaskInput:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          default: medium
+        due_date:
+          type: string
+          format: date
