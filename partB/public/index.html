@@ -2,32 +2,35 @@
 <html lang="mn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Миний даалгаврууд</h1>
-        
-        <div class="add-task">
-            <input type="text" id="taskTitle" placeholder="Даалгаврын нэр...">
+
+    <main class="container">
+        <div class="card add-section">
+            <input type="text" id="taskTitle" placeholder="Юу хийх вэ?">
             <select id="taskPriority">
                 <option value="low">Нам</option>
                 <option value="medium" selected>Дунд</option>
                 <option value="high">Өндөр</option>
             </select>
-            <button onclick="addTask()">Нэмэх</button>
+            <button onclick="addTask()" class="btn-add">Нэмэх</button>
         </div>
 
-        <div class="filters">
-            <button onclick="loadTasks()">Бүгд</button>
-            <button onclick="loadTasks('completed')">Дууссан</button>
-            <button onclick="loadTasks('pending')">Хүлээгдэж буй</button>
+        <div class="filter-bar">
+            <div class="btns">
+                <button onclick="filterTasks('all')" class="active" id="allBtn">Бүгд</button>
+                <button onclick="filterTasks('pending')" id="pendingBtn">⏳</button>
+                <button onclick="filterTasks('completed')" id="completedBtn">✅</button>
+            </div>
+            <div class="stats">
+                <span id="taskCount">Нийт: 0</span>
+            </div>
         </div>
 
-        <div id="taskList" class="task-list"></div>
-    </div>
+        <div id="taskList" class="list"></div>
+    </main>
 
     <script src="app.js"></script>
 </body>

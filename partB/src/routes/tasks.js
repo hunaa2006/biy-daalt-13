@@ -40,6 +40,26 @@ router.put('/:id', (req, res) => {
     }
 });
 
+router.patch('/:id', (req, res) => {
+    try {
+        const task = TaskService.getTaskById(req.params.id);
+        if (!task) {
+            return res.status(404).json({ success: false, error: 'Даалгавар олдсонгүй' });
+        }
+        
+        // Статусыг өөрчлөх (pending -> completed, completed -> pending)
+        const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+        const info = TaskService.updateTask(req.params.id, { status: newStatus });
+        
+        if (info.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Даалгавар олдсонгүй' });
+        }
+        res.json({ success: true, message: 'Статус шинэчлэгдлээ' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 router.delete('/:id', (req, res) => {
     try {
         const info = TaskService.deleteTask(req.params.id);
